@@ -20,5 +20,8 @@ npm run build
 ```
 
 The static site is generated in `dist/`. Configure your hosting provider to
-serve that directory and forward `/api` requests to the deployed Weatherly
-backend. The proxy in `vite.config.js` is for local development only.
+serve that directory. Set the build environment variable
+`VITE_API_BASE_URL` to the deployed Weatherly backend's public origin (for
+example, `https://your-weatherly-backend.example.com`). The frontend sends API
+requests to that origin. Leave the variable unset for local development, where
+the Vite proxy in `vite.config.js` forwards `/api` to `http://localhost:8080`.

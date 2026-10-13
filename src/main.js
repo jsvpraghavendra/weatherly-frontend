@@ -5,6 +5,7 @@ import { render } from "./ui.js";
 
 const $ = (selector) => document.querySelector(selector);
 const esc = (text) => String(text ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 const scene = createScene($("#scene"));
 
 /* ---------- Small helpers ---------- */
@@ -72,7 +73,7 @@ async function request(query) {
   setStatus("Fetching forecast...", "loading");
   $("#content").classList.add("busy");
   try {
-    const res = await fetch(`/api/weather?${query}`);
+    const res = await fetch(`${API_BASE_URL}/api/weather?${query}`);
     let body = null;
     try {
       body = await res.json();
@@ -146,7 +147,7 @@ input.addEventListener("input", () => {
   if (q.length < 2) return hideSuggest();
   timer = setTimeout(async () => {
     try {
-      const res = await fetch(`/api/cities?q=${encodeURIComponent(q)}`);
+      const res = await fetch(`${API_BASE_URL}/api/cities?q=${encodeURIComponent(q)}`);
       const items = await res.json();
       if (input.value.trim() === q) showSuggest(items);
     } catch (e) {
