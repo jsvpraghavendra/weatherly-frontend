@@ -88,7 +88,12 @@ async function request(query) {
     remember(data);
   } catch (err) {
     if (err instanceof TypeError) {
-      setStatus("Can't reach the backend. Start it first (see README.md).", "error");
+      setStatus(
+        API_BASE_URL
+          ? "Can't reach the weather backend. Check its URL and availability."
+          : "Can't reach the backend. Start it first (see README.md).",
+        "error"
+      );
     } else {
       setStatus(err.message, "error");
     }

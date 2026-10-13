@@ -14,6 +14,8 @@ The Vite development server proxies `/api` requests to the backend at
 
 ## Production build
 
+Use Node.js 20.19+ or 22.12+.
+
 ```sh
 npm ci
 npm run build
