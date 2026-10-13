@@ -5,7 +5,8 @@ import { render } from "./ui.js";
 
 const $ = (selector) => document.querySelector(selector);
 const esc = (text) => String(text ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
+const rawApiUrl = (import.meta.env.VITE_API_BASE_URL || "").trim();
+const API_BASE_URL = rawApiUrl.replace(/\/+$/, "");
 const scene = createScene($("#scene"));
 
 /* ---------- Small helpers ---------- */
@@ -80,7 +81,9 @@ async function request(query) {
     } catch (e) {
       /* not JSON */
     }
-    if (!res.ok) throw new Error((body && body.message) || "Something went wrong.");
+    if (!res.ok) {
+      throw new Error((body && body.message) || (res.status === 404 ? "City not found." : "Unable to retrieve weather forecast."));
+    }
     data = body;
     setStatus("");
     markPreview("");
@@ -103,6 +106,7 @@ async function request(query) {
 }
 
 function show() {
+  if (!data || !data.current) return;
   setSky(data.current.weather_code, data.current.is_day, data.current.cloud_cover);
   render(data, unit);
 }
@@ -130,10 +134,10 @@ function paintActive() {
 }
 
 function showSuggest(items) {
-  suggestions = items;
+  suggestions = Array.isArray(items) ? items : [];
   active = -1;
-  if (!items.length) return hideSuggest();
-  list.innerHTML = items
+  if (!suggestions.length) return hideSuggest();
+  list.innerHTML = suggestions
     .map((p, i) => `<li data-i="${i}"><strong>${esc(p.name)}</strong><span>${esc([p.region, p.country].filter(Boolean).join(", "))}</span></li>`)
     .join("");
   list.hidden = false;
@@ -153,8 +157,11 @@ input.addEventListener("input", () => {
   timer = setTimeout(async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/cities?q=${encodeURIComponent(q)}`);
+      if (!res.ok) return hideSuggest();
       const items = await res.json();
-      if (input.value.trim() === q) showSuggest(items);
+      if (Array.isArray(items) && input.value.trim() === q) {
+        showSuggest(items);
+      }
     } catch (e) {
       /* suggestions are optional */
     }
@@ -192,7 +199,10 @@ document.addEventListener("click", (event) => {
 $("#search").addEventListener("submit", (event) => {
   event.preventDefault();
   const city = input.value.trim();
-  if (!city) return;
+  if (!city) {
+    setStatus("Please enter a city name to search.", "error");
+    return;
+  }
   hideSuggest();
   input.blur();
   loadCity(city);

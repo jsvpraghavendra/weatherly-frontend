@@ -1,29 +1,61 @@
 # Weatherly Frontend
 
-Weatherly is a Vite-powered weather interface.
+Weatherly is a responsive, dynamic weather interface built with Vanilla JavaScript and Vite.
 
-## Local development
+---
 
+## Local Development
+
+### Requirements
+- **Node.js**: 20.19+ or 22.12+ (tested with Node 20/22/24)
+- **npm**: 10+
+
+### Setup and Start
 ```sh
 npm install
 npm run dev
 ```
 
-The Vite development server proxies `/api` requests to the backend at
-`http://localhost:8080`. The backend must be running for live weather searches.
+The application runs at `http://localhost:5173`.
+The Vite dev server proxies `/api` calls to the Spring Boot backend at `http://localhost:8080`.
+Ensure the backend is running for live weather forecasts.
 
-## Production build
-
-Use Node.js 20.19+ or 22.12+.
-
+### Run Tests
 ```sh
-npm ci
+npm test
+```
+
+### Build for Production
+```sh
 npm run build
 ```
 
-The static site is generated in `dist/`. Configure your hosting provider to
-serve that directory. Set the build environment variable
-`VITE_API_BASE_URL` to the deployed Weatherly backend's public origin (for
-example, `https://your-weatherly-backend.example.com`). The frontend sends API
-requests to that origin. Leave the variable unset for local development, where
-the Vite proxy in `vite.config.js` forwards `/api` to `http://localhost:8080`.
+Production output is generated in `dist/`.
+
+---
+
+## Render Deployment Guide
+
+Deploy this repository as a **Static Site** on Render:
+
+1. **New Static Site**: Connect your GitHub repository `weatherly-frontend`.
+2. **Build Settings**:
+   - **Build Command**: `npm install && npm run build` (or `npm ci && npm run build`)
+   - **Publish Directory**: `dist`
+3. **Environment Variables**:
+   In your Render Dashboard under **Environment**:
+
+   | Key | Value | Purpose |
+   |---|---|---|
+   | `VITE_API_BASE_URL` | `https://weatherly-backend-9dfy.onrender.com` | Base URL of the deployed Spring Boot backend. |
+
+> **Important**: Vite embeds `VITE_*` environment variables during build time (`npm run build`). If you set or change `VITE_API_BASE_URL` in the Render dashboard, trigger a **Manual Deploy > Clear build cache & deploy** for changes to take effect.
+
+---
+
+## Troubleshooting
+
+- **Error: "Can't reach the weather backend"**:
+  - Verify that the backend service at `https://weatherly-backend-9dfy.onrender.com` is active and healthy (visit `https://weatherly-backend-9dfy.onrender.com/health` to confirm).
+  - Verify that `VITE_API_BASE_URL` is set to the exact backend URL in Render environment settings without trailing slashes.
+  - Verify that the backend allows your frontend domain in `CORS_ALLOWED_ORIGINS`.
