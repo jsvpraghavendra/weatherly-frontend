@@ -70,7 +70,7 @@ function remember(d) {
 }
 
 /* ---------- Loading weather from the backend ---------- */
-async function request(query) {
+async function request(query, attempt = 1) {
   setStatus("Fetching forecast...", "loading");
   $("#content").classList.add("busy");
   try {
@@ -91,9 +91,14 @@ async function request(query) {
     remember(data);
   } catch (err) {
     if (err instanceof TypeError) {
+      if (API_BASE_URL && attempt < 2) {
+        setStatus(`Waking up weather backend (${API_BASE_URL}). Retrying...`, "loading");
+        await new Promise((r) => setTimeout(r, 4000));
+        return request(query, attempt + 1);
+      }
       setStatus(
         API_BASE_URL
-          ? "Can't reach the weather backend. Check its URL and availability."
+          ? `Can't reach the weather backend at ${API_BASE_URL}. Check its URL and ensure the service is live on Render.`
           : "Can't reach the backend. Start it first (see README.md).",
         "error"
       );
