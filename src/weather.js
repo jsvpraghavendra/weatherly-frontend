@@ -1,4 +1,4 @@
-// Turns Open-Meteo weather codes into text, icons and animation settings.
+// Turns weather codes into text, icons and animation settings.
 
 export function info(code, isDay) {
   if (code === 0) return { text: "Clear sky", icon: isDay ? "☀️" : "🌙" };
